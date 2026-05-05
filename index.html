@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submissão de Arquivo LAS — ENEVA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg:       #151E25;
+    --surface:  #1E2C35;
+    --surface2: #243340;
+    --surface3: #1A2830;
+    --text:     #FFFAF6;
+    --subtext:  #8A9BA8;
+    --border:   #2C3E4A;
+    --destaque: #E86D4E;
+    --teal:     #306E7D;
+    --verde:    #3A7D5C;
+    --ambar:    #C4873A;
+    --ok:       #3A7D5C;
+    --ok-bg:    #1A2E25;
+    --ok-bdr:   #2E5C42;
+    --err:      #C0392B;
+    --err-bg:   #2A1A18;
+    --err-bdr:  #5C2E2A;
+    --warn-bg:  #2A2218;
+    --warn-bdr: #5C4A2A;
+    --warn:     #C4873A;
+    --radius:   10px;
+    --shadow:   0 4px 20px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* TOP BAR */
+  .top-bar {
+    background: var(--surface3);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 32px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .top-bar .logo-mark {
+    width: 28px; height: 28px;
+    background: var(--destaque);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #fff; font-size: 13px; letter-spacing: -0.5px;
+  }
+  .top-bar .label {
+    color: var(--subtext); font-size: 12px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+
+  /* PAGE HEADER */
+  .page-header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--destaque);
+    padding: 28px 32px 24px;
+  }
+  .page-header .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--destaque); margin-bottom: 6px;
+  }
+  .page-header h1 {
+    font-size: 26px; font-weight: 700; color: var(--text);
+    line-height: 1.2; margin-bottom: 8px;
+  }
+  .gate-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--surface2); border: 1px solid var(--teal);
+    border-radius: 20px; padding: 3px 10px;
+    font-size: 11px; font-weight: 600; color: var(--subtext);
+    margin-right: 8px;
+  }
+  .gate-badge::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--teal); border-radius: 50%;
+  }
+
+  /* CONTAINER */
+  .container {
+    max-width: 780px; margin: 0 auto; padding: 28px 16px 0;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.8px;
+    text-transform: uppercase; color: var(--subtext);
+    background: var(--surface2);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-body { padding: 20px; }
+
+  /* DROP ZONE */
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .25s;
+    background: var(--surface2);
+  }
+  .dropzone:hover, .dropzone.dragover {
+    border-color: var(--teal);
+    background: #1E3040;
+  }
+  .dropzone.has-file {
+    border-color: var(--verde);
+    background: var(--ok-bg);
+    border-style: solid;
+  }
+  .dropzone-icon {
+    font-size: 36px; margin-bottom: 12px; display: block;
+    color: var(--subtext);
+  }
+  .dropzone.has-file .dropzone-icon { color: var(--verde); }
+  .dropzone h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+  .dropzone p  { font-size: 13px; color: var(--subtext); margin-bottom: 16px; }
+  .btn-select {
+    background: var(--destaque);
+    color: #fff; border: none; border-radius: 6px;
+    padding: 9px 22px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Sora', sans-serif;
+    transition: background .2s;
+  }
+  .btn-select:hover { background: #cc5535; }
+  .dropzone .file-hint {
+    display: block; font-size: 11px; color: var(--subtext); margin-top: 14px;
+  }
+  #file-input { display: none; }
+
+  /* VALIDATION BANNER */
+  .banner {
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: none;
+    border: 1px solid transparent;
+  }
+  .banner.warn  { background: var(--warn-bg); border-color: var(--warn-bdr); display: block; }
+  .banner.ok    { background: var(--ok-bg);   border-color: var(--ok-bdr);   display: block; }
+  .banner-title {
+    font-size: 13px; font-weight: 700; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .banner.warn .banner-title { color: var(--ambar); }
+  .banner.ok   .banner-title { color: #5DBF8A; }
+  .banner-desc { font-size: 12px; color: var(--subtext); margin-top: 8px; line-height: 1.6; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11.5px; font-weight: 600; padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .tag.ok   { background: var(--ok-bg);   color: #5DBF8A;       border: 1px solid var(--ok-bdr); }
+  .tag.fail { background: var(--err-bg);  color: #E07070;       border: 1px solid var(--err-bdr); }
+
+  /* METADATA */
+  .meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .meta-item label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--subtext);
+  }
+  .meta-value {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 7px 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px; color: var(--text);
+    min-height: 32px;
+  }
+  .meta-value.empty {
+    color: var(--subtext); font-style: italic;
+    font-family: 'Sora', sans-serif; font-size: 12px;
+  }
+
+  /* CURVES */
+  .curves-wrap { margin-top: 14px; }
+  .curves-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--subtext);
+    margin-bottom: 8px; display: block;
+  }
+  .curves-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .curve-tag {
+    background: #1A2E35; border: 1px solid var(--teal);
+    color: #6DC4D0; font-size: 11.5px; font-weight: 600;
+    padding: 4px 10px; border-radius: 4px;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* FOOTER ACTIONS */
+  .actions {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .btn-back {
+    background: none; border: 1px solid var(--border);
+    color: var(--subtext); border-radius: 6px;
+    padding: 9px 18px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Sora', sans-serif;
+    transition: all .2s;
+  }
+  .btn-back:hover { border-color: var(--subtext); color: var(--text); }
+  .btn-submit {
+    background: var(--teal);
+    color: #fff; border: none; border-radius: 6px;
+    padding: 9px 24px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Sora', sans-serif;
+    transition: background .2s; display: flex; align-items: center; gap: 8px;
+  }
+  .btn-submit:hover:not(:disabled) { background: #245A68; }
+  .btn-submit:disabled { background: var(--border); color: var(--subtext); cursor: not-allowed; }
+  .btn-submit.loading { opacity: 0.7; pointer-events: none; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 20px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    transform: translateY(80px); opacity: 0;
+    transition: all .35s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999; max-width: 360px;
+  }
+  .toast.show  { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--ok-bg);  border-color: var(--ok-bdr);  color: #5DBF8A; }
+  .toast.error   { background: var(--err-bg); border-color: var(--err-bdr); color: #E07070; }
+
+  /* SPINNER */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+  }
+  .btn-submit.loading .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* FOOTER */
+  .page-footer {
+    text-align: center; padding: 32px 16px 0;
+    font-size: 11px; color: var(--subtext);
+    letter-spacing: 0.5px;
+  }
+
+  /* ACCENT LINE on cards */
+  .card { border-left: 3px solid var(--teal); }
+
+
+  /* TIPO DADOS TOGGLE */
+  .tipo-card { margin-bottom: 16px; }
+  .tipo-options {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-top: 4px;
+  }
+  .tipo-btn {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; padding: 18px 12px;
+    background: var(--surface2); border: 2px solid var(--border);
+    border-radius: var(--radius); cursor: pointer;
+    transition: all .2s; text-align: center;
+    font-family: 'Sora', sans-serif;
+  }
+  .tipo-btn:hover { border-color: var(--teal); background: #1E3040; }
+  .tipo-btn.selected-campo {
+    border-color: var(--teal);
+    background: #1A2E35;
+    box-shadow: 0 0 0 3px rgba(48,110,125,0.2);
+  }
+  .tipo-btn.selected-reprocessado {
+    border-color: var(--ambar);
+    background: #2A2010;
+    box-shadow: 0 0 0 3px rgba(196,135,58,0.2);
+  }
+  .tipo-btn .tipo-icon { font-size: 28px; }
+  .tipo-btn .tipo-label {
+    font-size: 14px; font-weight: 700; color: var(--text);
+  }
+  .tipo-btn .tipo-desc {
+    font-size: 11px; color: var(--subtext); line-height: 1.4;
+  }
+  .tipo-btn.selected-campo .tipo-label   { color: #6DC4D0; }
+  .tipo-btn.selected-reprocessado .tipo-label { color: var(--ambar); }
+  /* RESPONSIVE */
+  @media (max-width: 520px) {
+    .meta-grid { grid-template-columns: 1fr; }
+    .page-header { padding: 20px 16px 16px; }
+    .container { padding: 16px 10px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <span class="label">Data Management E&P</span>
+  <div style="margin-left:auto; background:#1A2830; line-height:0; border-radius:4px; overflow:hidden;">
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCABjAQ8DASIAAhEBAxEB/8QAHgABAAEEAwEBAAAAAAAAAAAAAAgBAgcJAwUGCgT/xABEEAABAgUDAgQEAwMICQUAAAABAgMABAUGEQcIIRIxCRMiQRQyUWFxgZEVI0IWJFJ2obTB0Rc2NzhiY3Wxsxg0U5Oj/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/ANVUIQgEIQgEI2geD1pXpheVDvq77usCiV6s0qoSstTJuoywmFyyShalBCXMoQolSfUj1cRG3xB9tKNANYnqnbkqDaN6LdqFISygoblnAeqZlcY7IccCm/8AlKR3gIowiWfh5baWdfdYmq9dUt5tmWWtmo1VC1ACdeCv3Mqnq4IUrK1g90JUPeJf+LRo1o5beiDN82ppnblFudVxSTEzU6bT0SjzzS2n+oL8odK0qPQcq5yj6wGo2EIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIqEKPypJwMnHtAbIvDf2W6Ba76RXPfOpFQNw1iYccozVLYdcYVRj09aHc49TywOpCh6QnPv2x3uW8NHUvS1c3cWkc2b2ttGXUy/QEVaVbGeoKYHpfAwfUjK+PlGI8d4dOv7uh2vMlSqrUkStt3mkUmppeWQlh8HqlpgewUHQGyT2Q459REttz+6rUTRS/nJ2o0tFxWLWyhKFS/7mcpM0PmaKjw91BKT+8x3VAYv8O6+ZrT3QnVEJddkZ1M8taVcpcZcRIn1AdwUqH6iPQ0nXS3N3u3B+ytQHGF1pqU+En3FNBapSfbQkMzrOeU+YUdSse6lo/iwcO6kbprFrFBqs5bU4gPVtt4vJ+E8mYcfW2U9T3SOlR54IiKVkX5XbDnXJ6izim0vpDb7IPDgwcH8jAbAZjXWW2hbZqbYlqvygul2WVLMGVQkJcqDuVOzalj5wjqWEqz7NjPpEej33agO31tIpki465MzjlTpL6sglbjvlLTx7n51cf8Q+sa2b1vuuX3Uk1GtPqV5TYbaa6spQPsIlRYW5yy2KJT0XNNNLbpqZd3ynmC6rzW09OUpIwT9Pp3gO020+GPqNqe9I3Pq/NO2dbrqwRIthCqrNg4wlDfKWMgk5WCRgennIzH4h2yLbtoftwpV8aeSi6FcFDqErTXErmlPGsB5SgpL2cjzQEKX1J6QA2sdPPp7/a3un1C1mvj9oS8ki3rCpLamnCtYXN1ebUMJR1dkoRy4QPdCB7mI6eJdugl9ZL6p2m1o1UzdsWctz4p5pZ8idqqkpS6of0g0AG0q9/WfeAhU51e4xyePofpFsVPI+bP4/WKEEYJHftAIQhAIQhAIQhAIQhAIQhAIQhAIQhAIQhAIQhAIQhAIQhAXoQopynuc/oBkxtx0b8J7QW69GbIvi7Kvdz9buC35Kq1BlipMstpW+wh3oQC0cBJVgZJ7e8ajgvCQk8gZOD94lvtl8RfVvQaVk7PudTl52Yz5aESc3MlE5ItgAAS0xhXpSMANuJWnAwOj2CUmofh9bUrCacLExcTc6wAU/FV9KFnnIIHSDkEfSI77n76oj1pTNuvVRFRa8pthtan0uOlY7uOYJy59xxGWNb9Q9q+9alPvW7NGnXjLS63Zd+dkBKVJCRzhzktPNpHzJCzgDlXvGvS9bRqdk1ldJqr7T689bb7KlKSsfXCsGA87x9IpCEAH3iqcFQGSPv9IpAd+ICaO2O/6Ii027bl6mKQyplTK1ImktONuLGFLCj75wcxIHTjYJtQv5bTb79xqfm0gtCVuFsuLc5KuOlfUo5HCR/CTGs+yLRqN7VpujU51lpbhClrcUQlKcgE4AOe/bET90QrG2vZEw1fF2zs1ULqnmCEKl0oen1NqHqQwjIQ0k45WrGO3cgQGV9YvCd0VtLRq87vsup3eLio9Dm6pT5eZqrbiHHWGy4ELT5STg4x9s+0ajX0hKhhaVZHOB+n9mD+cS03O+Ipq3roxM2hbRVZllOrViQkVqTNTjJGAJl7JKsgnIScHPvESnVhZBH0+nb2x9xxAWQgBntH7qTQ6zXqhL0ihUqbqM/Nq6GJWUZU886r6JQkEk/YcwH4YRnCQ2PbuqlIGpyu3q9PIDfmZdpqmllP2QvCifsBmMY3fp1fmn1X/YF9WhWLfqRBUJSpSbku8Ug4KghYBI47gYI5GRzAedhFVJKFFBxlJwcEEfqO8dzOWVeFOklVGoWrV5WUQlKlPvSLqG0pV8pKynpAPscwHSwju7Tse879qaaJY9qVe4KioFQlKXJOTT3SO6uhsEgD3OMR76sbStz1Ap7lWrOgV+ykmyjzHHl0GZ6Upxkk4RwAO8BiaEXFpaQCoEAnHIPf3/w/UQDSz7DkdXJHaAthHvtPNAdbNWW1TGmuldz3JLoPSuZp9NddYQc4wp0DoSfsSDHf3ptE3O6eU1VYvDQu8ZCQbGXJoUxx5lsfVS2wpKR+JEBiKEcgYdKesIOCekcHlX0H1PMd4zp5fkzLMzkrZddfl5lCXGHm6c8pDqFY6VJITyD1DB7HMB5+Ecs1KzMjMuyc4wtl9ham3WnE9K21pJCkqB5BBBBBixLalJKhjCRkn6Dt/wBzAWwj0UtpzqBNpaXLWRXnUvpSppSKc8Q4FYIKT04IIIP4R+Ch2vctz1H9kW1b9Sq090lfw0jKOPu9IOCehAKsZI9oDrIRm2j7Jd21dlROU/b3e3kqGQqYpi5f+x3pMcVwbLt2Fryypus7fb3Q0jupikuTA/8AyCoDC8I5X5V+VdcYmW1NOtKKFtrBSpKgcFJB5BBzwfpHFAVCCRkEY9/t3/yiVe2DYDq9r8pi5KvLv2dZuEL/AGzOS6i5MpI+WVa/jJGD1qKU8ggntEVQvCenHvmNoOlvjB2dZelFoWFX9IaxNT9t0WSpD05KzzIS+WJdDRcSFD0Z6M457wF2sFobcdlFiTFv0JMiu5Zhj0odfQ5VqgVfKVk9QZaOc5wlKR7L99b98XlUb9uB+u1Ftppaj6Wmz6Ep+gifF+eIdoHqjNn4jb9VpmpzgS028uVkn3VLKsDpJ9RyewJI+0Ys3R6WW3blnO3FN2/K0N0IaCJdhlKFJec+VsEfN9zjjpXx6eQhrCLvL4JKgO+D7GLYBADJxAcnviL0oJJwe3t2MB39i3dO2PcLFwSUsxMFn5mXVABacjIzng8d42H6Jy23/eraiNOa+tyUrzTSnWGEFpFVlVIwS7LOEetIzygk9QJ44yMKbZNMbdrtot3JT7fla4+lKytpTKC4p1AypvK+x44ODmMl6d+INoNpfPonZfQaqNVGUK2g81LScu8hXYgq4IOO4784gMJbndgOsWgDjtdpUou8LNBW4is06XV5jCRg4mmeVNnHuMp9KjxiIuLQUHBIPGeDmNomp/jDW1d2ltz2ZbGlFZkanWqRM0uXnZqdZLcuXmlNl0oQk9eAonBI59+8avHCkkEfmIDllGn5hxtiVaUt5bgQ2EjJUtWAlI+8fQrtM2taZbWdK6e1TqLKIuN6RTOXBW5lsKmFulHU6kOHltpPICRgEIJKckxpQ2UWlTL43V6X23V5dL8o/ccs+82oZC0skv8ASfsfKwfsTH0F6nWUjUzT+5NPF12bpCLkpT9McnpToL7DbyChS2weOrpWRyPeAiFdvi+7ZLSu9y16dTLvuCSlJtcvM1inybQkwOsgrb810OOJH2SnIHAxgRIyuW3ohvI0XllVKUp11Wbc8qH5GZLGHWCpOPMaUR1y76V8EjBGCD7xEBHgm6QHCxrLeCT3ITKyh6T9j0xMvbZoLSdtWktN0ioFxVGtSFLfmHmZqebQl0h51TikkIATgFRAgPnq130jrGhert1aU118PTVuVFyVS90FPnskBbLuPbrbWhWMnGSMnufocuvTWlay6Bv6YV94y8nc1top7zzaepTHmMDDiAT8yFYI59o05eLKzKtbzrgXLthLz1Hpan8Dur4YJyfp6AiN31lf6o0H/pkr/wCIQEcntU9mfh8WfJaWTl0yNAdbbEwunysuuaqc4s8/ETIaSV5V2C3SkEDCcgRkLQLdtoVuYRUG9JbtXUJymIDk9ITUs7LzLDZOAstuAZSTx1JJGe8aEdytyVmubg9RqnWag/OTZumqMqdcWSooRMrSlOTz0gJSAOwxxiJYeDA+t3c9cqASlKbGm8jOer+fSff8yYD03jC7f7VsK5LS1ps+mStJVdC5ml1iWlWvLQ9MsYWzMEJGOpaCpKhgfIjvzjE/hj7XqPuC1lma9fVCZqNm2ZLJnZuXfa6mJ2acOGZdzIPUnhaik9+jES58bJQRotYGQSVXS6PwHwjmf1OD+Uek8Gm3ZanbY67cbaB8VWrsm1PLwAelqXYShP4D1EfdaoCRG4Hc/ols+tSmzV9zapJqbDjNIodKlEKmJhLYGUstApQ22jqQCTgDrTzmPB7ZPEW0R3QXo5p5QZCv25cZbW7IyVYZbBnW0oK1+Utlak9SUpKilWOAcExbuv2BWnu5valXhduplx0YUemfAS0jISzCmU5dW4p3LiSepQWlJ5xhpHEeE0X8JzTXRTVG2tUqFqxdM7N23OidblZiVlktv+lSShZSkK6SFkHHccQGJvFp2kWdIWUjcxYtHRS6tITrMncctKNpQzMNOnobmSE/K4lwoBP8QcGewzKHw3tSZbUTZ5Yb7c4l6dt6Xct6dA+ZtUqvoQFH2/cKl1fgRHb+IRLSzuzTVJqaSlSFUhCkpKTjzEvtKR2B7FIP5CNffg6a/wA1aeqFX0Dqim1Um9GXKlIqUvluoy7fqSkZwfMZBBHclpv8w8D4s+iw013OO3lTZcN0u/6emrpCAeluaaPkzCfxJS24fu8Yjft60qmtadaLM0tlG1rTcNZZk5lxrILcrnqmHQR/8bSVL7e0bgfFo0Yp+o+2aZ1BBUmracTCKkwQB+9ln1tsTDRPsMKS5ke7Q4wYjd4MmiAqV0Xdr3VWFBNET/J6iLKfQZl1PmTLg+6Ww0jj2eUPaAn9ux1apG3LbRdd6U7yJJ6nUv8AZ9DYT6UmbeAal0pGRwCeo45CUKMaj/Db3H6U7cdVruvjVuuzknK1O3XJKXcalHJp1+YU+04RhAyDhC/UVJ5I++JPeNfqpJM2/p9ovLTCFzMzOP3RPNpV6m2m21S8tkfRanZj/wCsGIM7Vdn+qO7CvT8jZsyxSaPSkITVa5PBSZSX6xltoFPLjisK9A7YBJGRAbIat40W3OnzRlqVp/qDUGkAAvliUayfslUwT+sZi2z+IboRueuk2FZ8ncVFuFUs7NMyNVk0ITMIbPr8tbS1pJA5wSOP0iOFI8EzT9tkKuDXO4Jl4cqEnSWZZKe2QEqcdVkfic8RmLbj4ZWm+2jVqmauW7qVcFVm6ZLTbIlKhLsJbcDzJbUSUJB4BJH3gI3+Mft7si1pG2Nd7Yo0vSqpWakaLWkyjQQ3OOFpx5t9QAALn7pSVK4JHT3jV1G6TxpUhO2K1/c/y3lR+slOn/CNLcAjkS+4gAJJHtkKI/xjjhASo8PDQyb1k3A02rzEoldBstIrlTW4kKSXRlMq125KnelRH9FCuOMxKvdXtf1M1s1GapMwsW/YduhS0Pj1zFTm3ceaptvOUoRzguFKvUr0erjEfh+b6dLNs2nl1WbfljJROOhys0yq00FczUZkJ8sSr4USEHGehQCUgdWUknqPida/E1141T+LpVpN02xqNM9baESCQ7PpQvv/ADtwfuyfq0ls/eAu1O2qWrb9An5K3myJilsuPPPKdDj7ag2pQQ5jgdh6fv3ERZtSy6/eU65I0SSW6tkdTpxwhOCef0ifvh3WDM6s6KapLnQ7UarNVFculTrhLjzrkkQAVHnk8fbMd5WNCbM2Z7dZm8LmCZq4X2GviA4s9U5VXGwUSyAMehtxS+rH8LZJPOYDXJdFn1uzagKdXZXy1rb8xtSeUOJ7ZSfcZ4iU2nm1u2KjQZMV+WCTVkMpDrjoS4FuNhYCSeEkZIyeOOcRmq3dALc3kbZ5G7qMmXF0MyzwbXKqCBK1JrIW04nnDbnpUEE9nEkGPRb9tNVaa7UafPsgylSlaxSpcrbUUrQ4htWSkjkYWkEe/AgObaptk1O0Y1BdoqVJuKyK+kvtzgSG5qmzqMFPmtr/AIFAKSVoynJTzzgx68SzbUnSLUuV1NtiSW3bl9LdddAGEy1UThb7f0AWHEuJGB/GBnpyfyaH+Jtrppm7JU69GaZetHlcBSp1hLdQQjt6ZhGPMI9vNC+cH2jKm/bxANHdxmg1CsKw7Ym3K3UZxipVFyooKVUVUv1ANoPAccV1qHWPT0dQIyR0hrrUrpV3K0+3X/lmLCcxc4QTkA4ycE+/PeLYDLu0i9afpxuV01verTIl5CmXLJfGOlQAbYcX5biz/wAIQpRP2jfluYtW9L60Cvq07BqM5I3HO0V79lvysw5LuCYSCpCUOIIIJ8spwP6WftHzZIJHygZz/ZG3faf4tNhVS25CzNxpctutSLDbDVxS8st2QqCEJCet9Kepxp49ICilK0k9Sh0Z6QGs6f1t3AUyefp1R1c1AlZuXdW2+w7cM2lbawT1JUCvIOY4Fa966AAjWi+znjH8pZzP6ByN1V0Xh4YmrT7ty3ncGiFXnpgl9+bnX5NqaXn3WpXS4o4A+bnj27R5Z/VHwnNMGzOU7/REXGUKKRTaI3UXVEdukttr5/HvAaU7guS4rnqr1Zums1Cq1NwJS9NT8wt95YSOkBS1kqOE8cmPp1sr/VGg/wDTJX/xCPmq1uuO3ru1kvm6rRbbRQ6xcdTn6YltjyEiUdmnFsgN4HQOhSfTgY7YHaN3lreJLstkLbpMlOa2yjL0tT5VDgVR6kcKCQlQ/wDb+0BpM3Af7ddRv621j+9uRL7wWv8Aefuf+o05/fpGIb6xVekXPq5etx0aaL9NqtxVGelHgnlxl2ZcUhQH4ERJDwwdbtLdANd69eWq91N0CkzlqTFPZmHZd14LfXMyrgSEtpJ7NKP5QEw/Gz/2Mae5AIF0vHH1/mrkdp4Md2y9Q2+XVZ/nI+KoV1LfW0FZUGpiXaKVYx7qbcH4pjCXil7rtBNwGl9nUTSHUBivVCkV9c/Msok5hotNKl1ICsuNhJ9Sh7xE3Zxu2ufaTqf/ACzptNFWolRlvga3SvM8szTHUVJUheCEuIUSUkgjBKTwYCXXi5r1t041joF/2rfV10i1K9RGpEfsyqzDEuzUGFuFxtQQsAEtuNKBxz6uPSTEC16767Iz16zX4nAB9VwzgyD2I9faN19v77NjWudpfsu9b3ttiVnEATdEu+VQ0AcY6VB4FtRGcZBye8ednZfwlqO6qozidBMqwsoadlHwPwZRkD8k88fSA0yVjV7Vi46U/Sri1Ou6qU6ZAQ9LT1YmX2VjIOClSyD27GPy6ZagVnSrUW3dR7dc8uoW5U5epS5I4JbUFdJ+yhkEc8E94nr4hmt+yW6NGZPTrbdK2s3XmrglJ2aeoFtCRbVKtszCSkvBtAX6nE45V2PbMa5HQprpSQAcA4+hBPeA+ki+6XSdx+2itU2grHwGoVpOuU5YHUE/FypcYXjjqIWtBI45GPbMeY2OaROaF7YbIsqdpplKo5JmqVVLhHWmbmV+a4FHtlCFIRn6IH4RDDw5PEG0u070Nc0w3A341RXLZnlN0B1VPmny9IOfvC2Sy2sZbcK8ZI9CkpxwM5W3TeJjoG3oRdFN0M1Hart5VWWNKp7bdKnGfLDoCXX+p1pKR0tqUU88KCe+MQGs7fJrW3rtuevK+KfMF6ky82mlUg5yPhJUeWhQ+y1BbmP+Z3Pc7VPCSpEpTtm1KnZNfQ/Vq1U5l9QIJ8wPFlI7celpHBzjOf4o0YuDC8ccADjGO32icXh9+IT/AOl+Xd0v1EpL1RsGozip9MxJtBU5TH1pSla0pyA40elJKfmBSSO5BD03iy6tapyW5B2w5K769TLak6LIvSchJzb0uxMlzqcdeUhGEuKC8J6icgNY+8dF4UCdQ6/utpc5LTddn7fo9Nn3KqsTCzKS4XLFLXXhXTkuYAH1x942AXFua8OLWKUl65f94aYXCW2i22qv01Lky0hR6igNvtFYGfbtmMQ6oeJrtb0Fp8taO2S0qTXHHJln4hdNp/7PpsuyF/vCVpSlTzgGcAJ6efmI4gO28aj/AHYbX/rxJ/3GdjS1G0TxPt3W3rcHoJQrQ0l1CauCryV0y9SeYakZlny2ESs0gqJdbSDguJ7fjGruAQhCAu81fR0Z4zk/fjH+MXKfcUcq9RxjKsq/7xxwgNqXg13tYNDtq/bZuC7qJI1iZqUtNyNPnp9pl2ZT5HStaApWVJCsDgZGYjL4iu5RWuurqrXtqbW7aFkOP02RIPpm51KgmYmfuDhKEHA9KRyckmJbcy80oLQvBAwDgGKF5wgpKuDgHj6QEv8Aw5dy7OiesLdlXBMPfyRvqYYp80oeoSk+XOmWmSMjgFRSv3IUf6IxMDxeNQtNpzQiWs6lX5bs5czlyST79Glag27OtNtsvdTi2knrbTlQz1JGSU8+0afutWcggH7CKlxZSUlWQTnmAolRQrqAB/EAj+2Li6ogDAwCSB3xn8YshAVKuruBnPeKQhAIvQ6tAwk4/AkfnFkICvUeSTkmLvOWR0kkgDgEniLIQAkk5MVCsYwBxFIQFwdUk9ScA9hxF6Zl1CShtRShQwpIUcK/EZjihAV6ic5GeMfhFWnVsq60EBUWwgL/ADlhPQk9Kc56QTjMU8xfOFEZ+hi2EBcHFDgdvpn2+kUUoq7+3EUhAVCiARgc/URUuqJUcJBUckgY+v8AnFsICq1dairAGfYdhFxfWUBGE4H2/D9O3cRZCAqpa1HqUokn3PJ/WOb46YwQFAZT0nHBx09OM98Y/hzj7RwQgLlurcJLh6j9SSTFsIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQCEIQH/9k="
+         alt="ENEVA"
+         style="height:32px; display:block; mix-blend-mode:screen;" />
+  </div>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="eyebrow">ENEVA · DATA MANAGEMENT E&P</div>
+  <h1>Submissão de Arquivo LAS</h1>
+  <div style="margin-top:8px; display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
+    <span class="gate-badge">Gate 2</span>
+    <span style="font-size:13px; color:var(--subtext);">Envio oficial via Power Automate para aprovação geológica</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- WEBHOOK URL (hidden) -->
+  <input type="hidden" id="webhook-url" value="https://default204da8d8b4164fedb9c1878136be87.a1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6bbef2cbe6e642899ca5a0d0e9725ab2/triggers/manual/paths/invoke?api-version=1" />
+
+  <!-- TIPO DE DADOS -->
+  <div class="card tipo-card">
+    <div class="card-header">🗂️ Tipo de Dados</div>
+    <div class="card-body">
+      <div class="tipo-options">
+        <button class="tipo-btn" id="btn-campo" onclick="selectTipo('campo')">
+          <span class="tipo-icon">🛢️</span>
+          <span class="tipo-label">Dados de Campo</span>
+          <span class="tipo-desc">LAS bruto gerado durante a aquisição em poço</span>
+        </button>
+        <button class="tipo-btn" id="btn-reprocessado" onclick="selectTipo('reprocessado')">
+          <span class="tipo-icon">⚗️</span>
+          <span class="tipo-label">Reprocessados</span>
+          <span class="tipo-desc">LAS processado pela equipe de petrofísica</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DROP ZONE -->
+  <div class="card">
+    <div class="card-body" style="padding:20px;">
+      <div class="dropzone" id="dropzone">
+        <span class="dropzone-icon" id="dz-icon">📂</span>
+        <h3 id="dz-title">Arraste o arquivo LAS aqui</h3>
+        <p id="dz-sub">ou clique para selecionar</p>
+        <button class="btn-select" onclick="document.getElementById('file-input').click()">
+          Selecionar arquivo .las
+        </button>
+        <span class="file-hint">Somente arquivos .las · Versão LAS 2.0</span>
+        <input type="file" id="file-input" accept=".las,.LAS" />
+      </div>
+    </div>
+  </div>
+
+  <!-- VALIDATION BANNER -->
+  <div class="banner" id="validation-banner">
+    <div class="banner-title" id="banner-title"></div>
+    <div class="tags" id="banner-tags"></div>
+    <div class="banner-desc" id="banner-desc"></div>
+  </div>
+
+  <!-- METADATA -->
+  <div class="card" id="metadata-card" style="display:none;">
+    <div class="card-header">📋 Metadados Extraídos do Header</div>
+    <div class="card-body">
+      <div class="meta-grid">
+        <div class="meta-item">
+          <label>Arquivo</label>
+          <div class="meta-value" id="m-filename">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Tamanho</label>
+          <div class="meta-value" id="m-size">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Poço (WELL)</label>
+          <div class="meta-value" id="m-well">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Data de Aquisição (DATE)</label>
+          <div class="meta-value" id="m-date">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Prof. Inicial (STRT)</label>
+          <div class="meta-value" id="m-strt">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Prof. Final (STOP)</label>
+          <div class="meta-value" id="m-stop">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Passo (STEP)</label>
+          <div class="meta-value" id="m-step">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Empresa (COMP)</label>
+          <div class="meta-value" id="m-comp">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Kelly Bushing (KB)</label>
+          <div class="meta-value" id="m-kb">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Submission ID</label>
+          <div class="meta-value" id="m-sid" style="font-size:10px;">—</div>
+        </div>
+        <div class="meta-item" style="grid-column: span 2;">
+          <label>MD5 (Integridade)</label>
+          <div class="meta-value" id="m-md5">—</div>
+        </div>
+      </div>
+      <div class="curves-wrap" id="curves-wrap" style="display:none;">
+        <span class="curves-label" id="curves-label">Curvas Identificadas</span>
+        <div class="curves-tags" id="curves-tags"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="card" id="actions-card" style="display:none;">
+    <div class="actions">
+      <button class="btn-back" onclick="resetForm()">↩ Início</button>
+      <button class="btn-submit" id="btn-submit" disabled>
+        <div class="spinner"></div>
+        <span id="btn-label">Revisar e enviar →</span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="page-footer">ENEVA · Data Management E&P · Gate 2 — Submissão LAS</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+
+// ─── TIPO DE DADOS ────────────────────────────────────────────────────────────
+let tipoDados = null;
+
+function selectTipo(tipo) {
+  tipoDados = tipo;
+  document.getElementById('btn-campo').className =
+    'tipo-btn' + (tipo === 'campo' ? ' selected-campo' : '');
+  document.getElementById('btn-reprocessado').className =
+    'tipo-btn' + (tipo === 'reprocessado' ? ' selected-reprocessado' : '');
+}
+
+
+// ─── MD5 ──────────────────────────────────────────────────────────────────────
+async function calcMD5(file) {
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer); // fallback se MD5 nao disponivel
+  // MD5 via pure JS (sem WebCrypto pois nao suporta MD5)
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  return md5Bytes(bytes);
+}
+
+function md5Bytes(bytes) {
+  function safeAdd(x, y) {
+    const lsw = (x & 0xffff) + (y & 0xffff);
+    const msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+    return (msw << 16) | (lsw & 0xffff);
+  }
+  function bitRotateLeft(num, cnt) { return (num << cnt) | (num >>> (32 - cnt)); }
+  function md5cmn(q, a, b, x, s, t) { return safeAdd(bitRotateLeft(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b); }
+  function md5ff(a,b,c,d,x,s,t){ return md5cmn((b&c)|((~b)&d),a,b,x,s,t); }
+  function md5gg(a,b,c,d,x,s,t){ return md5cmn((b&d)|(c&(~d)),a,b,x,s,t); }
+  function md5hh(a,b,c,d,x,s,t){ return md5cmn(b^c^d,a,b,x,s,t); }
+  function md5ii(a,b,c,d,x,s,t){ return md5cmn(c^(b|(~d)),a,b,x,s,t); }
+
+  const numBytes = bytes.length;
+  const numWords = (((numBytes + 8) >>> 6) + 1) * 16;
+  const words = new Array(numWords).fill(0);
+  for (let i = 0; i < numBytes; i++) words[i>>2] |= bytes[i] << ((i%4)*8);
+  words[numBytes>>2] |= 0x80 << ((numBytes%4)*8);
+  words[numWords-2] = numBytes * 8;
+
+  let [a,b,c,d] = [1732584193,-271733879,-1732584194,271733878];
+  for (let i = 0; i < numWords; i += 16) {
+    const [aa,bb,cc,dd] = [a,b,c,d];
+    const w = words.slice(i, i+16);
+    a=md5ff(a,b,c,d,w[0],7,-680876936);   d=md5ff(d,a,b,c,w[1],12,-389564586);
+    c=md5ff(c,d,a,b,w[2],17,606105819);   b=md5ff(b,c,d,a,w[3],22,-1044525330);
+    a=md5ff(a,b,c,d,w[4],7,-176418897);   d=md5ff(d,a,b,c,w[5],12,1200080426);
+    c=md5ff(c,d,a,b,w[6],17,-1473231341); b=md5ff(b,c,d,a,w[7],22,-45705983);
+    a=md5ff(a,b,c,d,w[8],7,1770035416);   d=md5ff(d,a,b,c,w[9],12,-1958414417);
+    c=md5ff(c,d,a,b,w[10],17,-42063);     b=md5ff(b,c,d,a,w[11],22,-1990404162);
+    a=md5ff(a,b,c,d,w[12],7,1804603682);  d=md5ff(d,a,b,c,w[13],12,-40341101);
+    c=md5ff(c,d,a,b,w[14],17,-1502002290);b=md5ff(b,c,d,a,w[15],22,1236535329);
+    a=md5gg(a,b,c,d,w[1],5,-165796510);   d=md5gg(d,a,b,c,w[6],9,-1069501632);
+    c=md5gg(c,d,a,b,w[11],14,643717713);  b=md5gg(b,c,d,a,w[0],20,-373897302);
+    a=md5gg(a,b,c,d,w[5],5,-701558691);   d=md5gg(d,a,b,c,w[10],9,38016083);
+    c=md5gg(c,d,a,b,w[15],14,-660478335); b=md5gg(b,c,d,a,w[4],20,-405537848);
+    a=md5gg(a,b,c,d,w[9],5,568446438);    d=md5gg(d,a,b,c,w[14],9,-1019803690);
+    c=md5gg(c,d,a,b,w[3],14,-187363961);  b=md5gg(b,c,d,a,w[8],20,1163531501);
+    a=md5gg(a,b,c,d,w[13],5,-1444681467); d=md5gg(d,a,b,c,w[2],9,-51403784);
+    c=md5gg(c,d,a,b,w[7],14,1735328473);  b=md5gg(b,c,d,a,w[12],20,-1926607734);
+    a=md5hh(a,b,c,d,w[5],4,-378558);      d=md5hh(d,a,b,c,w[8],11,-2022574463);
+    c=md5hh(c,d,a,b,w[11],16,1839030562); b=md5hh(b,c,d,a,w[14],23,-35309556);
+    a=md5hh(a,b,c,d,w[1],4,-1530992060);  d=md5hh(d,a,b,c,w[4],11,1272893353);
+    c=md5hh(c,d,a,b,w[7],16,-155497632);  b=md5hh(b,c,d,a,w[10],23,-1094730640);
+    a=md5hh(a,b,c,d,w[13],4,681279174);   d=md5hh(d,a,b,c,w[0],11,-358537222);
+    c=md5hh(c,d,a,b,w[3],16,-722521979);  b=md5hh(b,c,d,a,w[6],23,76029189);
+    a=md5hh(a,b,c,d,w[9],4,-640364487);   d=md5hh(d,a,b,c,w[12],11,-421815835);
+    c=md5hh(c,d,a,b,w[15],16,530742520);  b=md5hh(b,c,d,a,w[2],23,-995338651);
+    a=md5ii(a,b,c,d,w[0],6,-198630844);   d=md5ii(d,a,b,c,w[7],10,1126891415);
+    c=md5ii(c,d,a,b,w[14],15,-1416354905);b=md5ii(b,c,d,a,w[5],21,-57434055);
+    a=md5ii(a,b,c,d,w[12],6,1700485571);  d=md5ii(d,a,b,c,w[3],10,-1894986606);
+    c=md5ii(c,d,a,b,w[10],15,-1051523);   b=md5ii(b,c,d,a,w[1],21,-2054922799);
+    a=md5ii(a,b,c,d,w[8],6,1873313359);   d=md5ii(d,a,b,c,w[15],10,-30611744);
+    c=md5ii(c,d,a,b,w[6],15,-1560198380); b=md5ii(b,c,d,a,w[13],21,1309151649);
+    a=md5ii(a,b,c,d,w[4],6,-145523070);   d=md5ii(d,a,b,c,w[11],10,-1120210379);
+    c=md5ii(c,d,a,b,w[2],15,718787259);   b=md5ii(b,c,d,a,w[9],21,-343485551);
+    a=safeAdd(a,aa); b=safeAdd(b,bb); c=safeAdd(c,cc); d=safeAdd(d,dd);
+  }
+  return [a,b,c,d].map(n => {
+    let s = '';
+    for (let i = 0; i < 4; i++) s += ('0' + ((n >> (i*8)) & 0xff).toString(16)).slice(-2);
+    return s;
+  }).join('');
+}
+
+// ─── UUID ────────────────────────────────────────────────────────────────────
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+// ─── REQUIRED FIELDS ───────────────────────────────────────────────────────
+const REQUIRED = ['WELL','DATE','STRT','STOP','STEP','CURVE'];
+const FIELD_LABELS = {
+  WELL:  'Poço (WELL)',
+  DATE:  'Data de Aquisição (DATE)',
+  STRT:  'Profundidade Inicial (STRT)',
+  STOP:  'Profundidade Final (STOP)',
+  STEP:  'Passo (STEP)',
+  CURVE: 'Curvas Presentes (CURVE)'
+};
+
+let currentFile = null;
+let parsedData  = null;
+
+// ─── DRAG & DROP ─────────────────────────────────────────────────────────────
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', ()=> dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+dz.addEventListener('click', e => {
+  if (e.target.tagName !== 'BUTTON') document.getElementById('file-input').click();
+});
+document.getElementById('file-input').addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+// ─── FILE HANDLER ────────────────────────────────────────────────────────────
+function handleFile(file) {
+  if (!file.name.toLowerCase().endsWith('.las')) {
+    showToast('⚠️ Somente arquivos .las são aceitos.', 'error'); return;
+  }
+  currentFile = file;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const text = e.target.result;
+    parsedData = parseLAS(text, file);
+    parsedData.md5 = md5Bytes(new Uint8Array(await file.arrayBuffer()));
+    renderUI(parsedData, file);
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+// ─── LAS PARSER ──────────────────────────────────────────────────────────────
+function parseLAS(text, file) {
+  const lines  = text.split(/\r?\n/);
+  const fields = {};
+  const curves = [];
+  let section  = '';
+
+  for (let raw of lines) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+
+    if (line.startsWith('~')) {
+      const s = line.slice(1).trim().toUpperCase();
+      if (s.startsWith('V'))      section = 'VERSION';
+      else if (s.startsWith('W')) section = 'WELL';
+      else if (s.startsWith('C')) section = 'CURVE';
+      else if (s.startsWith('A')) section = 'DATA';
+      else section = s;
+      continue;
+    }
+
+    if (section === 'DATA') break;
+
+    // parse mnemonic line:  MNEM .UNIT  VALUE : DESC
+    const dotIdx = line.indexOf('.');
+    if (dotIdx < 0) continue;
+    const mnem  = line.slice(0, dotIdx).trim().toUpperCase();
+    const rest  = line.slice(dotIdx + 1);
+    // value is between end-of-unit and ':'
+    const colonIdx = rest.lastIndexOf(':');
+    const valueRaw = colonIdx >= 0 ? rest.slice(0, colonIdx) : rest;
+    // remove unit (first non-space word before space+value)
+    const spaceIdx = valueRaw.search(/\s/);
+    const value    = (spaceIdx >= 0 ? valueRaw.slice(spaceIdx) : valueRaw).trim();
+
+    if (section === 'CURVE') {
+      if (mnem && mnem !== 'DEPT' || mnem === 'DEPT') {
+        if (mnem) curves.push(mnem);
+      }
+    } else {
+      if (mnem) fields[mnem] = value || null;
+    }
+  }
+
+  return {
+    filename: file.name,
+    size:     (file.size / 1024).toFixed(1) + ' KB',
+    well:     fields['WELL']  || null,
+    date:     fields['DATE']  || null,
+    strt:     fields['STRT']  || null,
+    stop:     fields['STOP']  || null,
+    step:     fields['STEP']  || null,
+    comp:     fields['COMP']  || fields['COMPANY'] || null,
+    kb:       fields['KB']   || fields['EKB']     || null,
+    curves:   curves,
+    raw:      fields
+  };
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function renderUI(data, file) {
+  // dropzone feedback
+  dz.classList.add('has-file');
+  document.getElementById('dz-icon').textContent  = '✅';
+  document.getElementById('dz-title').textContent = file.name;
+  document.getElementById('dz-sub').textContent   = (file.size/1024).toFixed(1) + ' KB — arquivo carregado';
+
+  // fill metadata
+  set('m-filename', data.filename);
+  set('m-size',     data.size);
+  set('m-well',     data.well);
+  set('m-date',     data.date);
+  set('m-strt',     data.strt);
+  set('m-stop',     data.stop);
+  set('m-step',     data.step);
+  set('m-comp',     data.comp);
+  set('m-kb',       data.kb);
+  set('m-sid',      data.submission_id);
+  set('m-md5',      data.md5);
+
+  // curves
+  if (data.curves.length > 0) {
+    const wrap  = document.getElementById('curves-wrap');
+    const tagsEl = document.getElementById('curves-tags');
+    document.getElementById('curves-label').textContent =
+      `Curvas Identificadas (${data.curves.length})`;
+    tagsEl.innerHTML = data.curves.map(c =>
+      `<span class="curve-tag">${c}</span>`).join('');
+    wrap.style.display = 'block';
+  }
+
+  // validate
+  // Enrich parsedData with audit fields
+  parsedData.submission_id     = generateUUID();
+  parsedData.curvas_lista      = data.curves.join(';');
+
+  const missing = REQUIRED.filter(f => {
+    if (f === 'CURVE') return data.curves.length === 0;
+    return !data[f.toLowerCase()];
+  });
+
+  parsedData.status_validacao  = missing.length === 0 ? 'aprovado' : 'bloqueado';
+  parsedData.campos_faltantes  = missing.length === 0 ? '' : missing.map(f => FIELD_LABELS[f]).join(';');
+
+  const banner  = document.getElementById('validation-banner');
+  const btnSubmit = document.getElementById('btn-submit');
+
+  if (missing.length === 0) {
+    // ALL OK
+    banner.className  = 'banner ok';
+    document.getElementById('banner-title').innerHTML = '✅ Header LAS completo — pronto para envio';
+    document.getElementById('banner-tags').innerHTML  =
+      REQUIRED.map(f => `<span class="tag ok">✓ ${FIELD_LABELS[f]}</span>`).join('');
+    document.getElementById('banner-desc').textContent = '';
+    btnSubmit.disabled = (tipoDados === null);
+    btnSubmit.style.background = tipoDados ? 'var(--teal)' : '';
+    if (!tipoDados) {
+      document.getElementById('banner-desc').textContent += ' Selecione o tipo de dados acima para habilitar o envio.';
+    }
+  } else {
+    // INCOMPLETE
+    banner.className  = 'banner warn';
+    document.getElementById('banner-title').innerHTML = '⚠️ Header LAS incompleto — verificar campos';
+    document.getElementById('banner-tags').innerHTML  =
+      REQUIRED.map(f => {
+        const ok = missing.indexOf(f) < 0;
+        return `<span class="tag ${ok?'ok':'fail'}">${ok?'✓':'✗'} ${FIELD_LABELS[f]}</span>`;
+      }).join('');
+    document.getElementById('banner-desc').innerHTML =
+      '⊘ <strong>Envio bloqueado — header LAS incompleto.</strong> ' +
+      'Corrija os campos marcados com ✗ no arquivo LAS e faça uma nova submissão. ' +
+      'Não é possível prosseguir com dados obrigatórios ausentes.';
+    btnSubmit.disabled = true;
+  }
+
+  document.getElementById('metadata-card').style.display = 'block';
+  document.getElementById('actions-card').style.display  = 'block';
+}
+
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (val) {
+    el.textContent = val;
+    el.classList.remove('empty');
+  } else {
+    el.textContent = 'não identificado';
+    el.classList.add('empty');
+  }
+}
+
+// ─── SUBMIT ──────────────────────────────────────────────────────────────────
+document.getElementById('btn-submit').addEventListener('click', async () => {
+  const webhookUrl = document.getElementById('webhook-url').value.trim();
+  if (!webhookUrl) { showToast('⚠️ Informe a URL do webhook.', 'error'); return; }
+  if (!currentFile || !parsedData) return;
+  if (!tipoDados) { showToast('⚠️ Selecione o tipo de dados (Campo ou Reprocessado).', 'error'); return; }
+
+  const btn = document.getElementById('btn-submit');
+  btn.classList.add('loading');
+  document.getElementById('btn-label').textContent = 'Enviando...';
+
+  // encode file as base64
+  const base64 = await fileToBase64(currentFile);
+
+  const payload = {
+    submissao: {
+      timestamp:  new Date().toISOString(),
+      gate:       'Gate 2 - Submissão LAS',
+      origem:     'Interface Web LAS Upload',
+      tipo_dados: tipoDados
+    },
+    arquivo: {
+      nome:            parsedData.filename,
+      tamanho_kb:      parseFloat(parsedData.size),
+      md5:             parsedData.md5,
+      conteudo:        base64
+    },
+    metadados: {
+      poco:              parsedData.well,
+      data_aquisicao:    parsedData.date,
+      prof_inicial:      parsedData.strt,
+      prof_final:        parsedData.stop,
+      passo:             parsedData.step,
+      empresa:           parsedData.comp,
+      kb:                parsedData.kb,
+      curvas:            parsedData.curves,
+      curvas_lista:      parsedData.curvas_lista,
+      total_curvas:      parsedData.curves.length,
+      status_validacao:  parsedData.status_validacao,
+      campos_faltantes:  parsedData.campos_faltantes,
+      submission_id:     parsedData.submission_id
+    }
+  };
+
+  try {
+    const resp = await fetch(webhookUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    });
+
+    if (resp.ok || resp.status === 202) {
+      showToast('✅ Arquivo enviado com sucesso ao Power Automate!', 'success');
+      btn.disabled = true;
+      document.getElementById('btn-label').textContent = '✓ Enviado';
+      btn.style.background = 'var(--ok)';
+    } else {
+      throw new Error(`HTTP ${resp.status}`);
+    }
+  } catch (err) {
+    showToast(`❌ Erro ao enviar: ${err.message}`, 'error');
+  } finally {
+    btn.classList.remove('loading');
+    if (!btn.disabled) document.getElementById('btn-label').textContent = 'Revisar e enviar →';
+  }
+});
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload  = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function resetForm() {
+  currentFile = parsedData = null;
+  tipoDados = null;
+  document.getElementById('btn-campo').className = 'tipo-btn';
+  document.getElementById('btn-reprocessado').className = 'tipo-btn';
+  dz.classList.remove('has-file');
+  document.getElementById('dz-icon').textContent  = '📂';
+  document.getElementById('dz-title').textContent = 'Arraste o arquivo LAS aqui';
+  document.getElementById('dz-sub').textContent   = 'ou clique para selecionar';
+  document.getElementById('file-input').value     = '';
+  document.getElementById('validation-banner').className = 'banner';
+  document.getElementById('metadata-card').style.display = 'none';
+  document.getElementById('actions-card').style.display  = 'none';
+  document.getElementById('curves-wrap').style.display   = 'none';
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true; btn.style.background = '';
+  btn.classList.remove('loading');
+  document.getElementById('btn-label').textContent = 'Revisar e enviar →';
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent  = msg;
+  t.className    = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 4500);
+}
+</script>
+</body>
+</html>
