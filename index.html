@@ -1,3 +1,30 @@
+<!--
+================================================================================
+  SUBMISSÃO DE ARQUIVO LAS — GATE 2
+  Interface web para envio formal de arquivos LAS ao fluxo de gestão de dados
+  de Exploração e Produção da ENEVA.
+
+  Funcionalidades:
+    - Parse e validação do header LAS 2.0 no browser (client-side)
+    - Validação de campos obrigatórios: WELL, DATE, STRT, STOP, STEP, CURVE, KB
+    - Cálculo de hash MD5 para integridade e rastreabilidade
+    - Envio via webhook HTTP para fluxo Power Automate (Gate 2)
+    - Registro automático em log CSV no SharePoint
+    - Notificação por e-mail ao responsável de Data Management
+    - Histórico de envios da sessão e confirmação visual pós-envio
+
+  Integração:
+    - Power Automate: LAS_Submissao_gate_2
+    - SharePoint: eneva.sharepoint.com/sites/EXP-RES_BI
+    - Repositório: github.com/enevaexp/las-submit
+
+  Autor:    Leandro Ribeiro
+  Setor:    Data Management — Exploração & Produção
+  Empresa:  ENEVA S.A.
+  Data:     Maio de 2026
+  Versão:   1.0
+================================================================================
+-->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -560,6 +587,12 @@
 
   <!-- ACTIONS -->
   <div class="card" id="actions-card" style="display:none;">
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-step" id="step-1"><span class="step-icon">📦</span> Preparando dados...</div>
+      <div class="progress-step" id="step-2"><span class="step-icon">📡</span> Enviando para Power Automate...</div>
+      <div class="step-bar"><div class="step-bar-fill" id="step-bar-fill"></div></div>
+      <div class="progress-step" id="step-3"><span class="step-icon">✅</span> Concluído</div>
+    </div>
     <div class="actions">
       <button class="btn-back" onclick="resetForm()">↩ Início</button>
       <button class="btn-submit" id="btn-submit" disabled>
@@ -602,6 +635,10 @@
 <script>
 
 // ─── TIPO DE DADOS ────────────────────────────────────────────────────────────
+// Controla a seleção do tipo de dado (Campo ou Reprocessado).
+// O tipo é obrigatório e deve ser selecionado ANTES de carregar o arquivo.
+// O valor é armazenado na variável "tipoDados" e incluído no payload como "tipo_dados".
+// Impacta o visual dos botões (teal para Campo, âmbar para Reprocessado) e o CSV de log.
 let tipoDados = null;
 
 function selectTipo(tipo) {
@@ -614,6 +651,11 @@ function selectTipo(tipo) {
 
 
 // ─── MD5 ──────────────────────────────────────────────────────────────────────
+// Implementação pura de MD5 em JavaScript (sem dependências externas).
+// Usado para gerar hash de integridade do arquivo LAS antes do envio.
+// O hash é calculado localmente no browser — nunca sai da máquina do usuário antes do envio.
+// IMPORTANTE: o MD5 é enviado no payload e registrado no CSV para auditoria futura.
+// Não usar para fins criptográficos — apenas para detecção de duplicatas e integridade.
 async function calcMD5(file) {
   const buffer = await file.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer); // fallback se MD5 nao disponivel
@@ -688,6 +730,9 @@ function md5Bytes(bytes) {
 }
 
 // ─── UUID ────────────────────────────────────────────────────────────────────
+// Gera um identificador único (UUIDv4) para cada submissão.
+// Serve como chave primária no CSV de log e permite rastrear um envio específico
+// em caso de auditoria ou suporte. Gerado no momento do parse do arquivo.
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     const r = Math.random() * 16 | 0;
@@ -696,6 +741,9 @@ function generateUUID() {
 }
 
 // ─── TIPO HINT ───────────────────────────────────────────────────────────────
+// Exibe aviso visual quando o usuário tenta carregar um arquivo sem selecionar
+// o tipo de dado (Campo ou Reprocessado). O upload é bloqueado até que o tipo seja definido.
+// Isso garante que o metadado "tipo_dados" sempre esteja presente no payload.
 function showTipoHint() {
   const h = document.getElementById('tipo-hint');
   h.classList.add('show');
@@ -703,6 +751,9 @@ function showTipoHint() {
 }
 
 // ─── HISTORY ─────────────────────────────────────────────────────────────────
+// Histórico de envios da sessão atual. Armazenado em sessionStorage (memória do browser).
+// Os dados são perdidos ao fechar ou recarregar a aba — comportamento intencional por segurança.
+// Máximo de 5 entradas. Exibe: poço, nome do arquivo, tipo e horário do envio.
 function saveHistory(data) {
   const history = JSON.parse(sessionStorage.getItem('las_history') || '[]');
   history.unshift({
@@ -735,6 +786,9 @@ function renderHistory() {
 }
 
 // ─── MODAL ───────────────────────────────────────────────────────────────────
+// Modal de confirmação exibido após envio bem-sucedido (Opção B de UX).
+// Exibe resumo do envio: poço, arquivo, tipo, profundidade, curvas e status.
+// Dois botões: "Novo envio" (limpa o formulário) e "Fechar" (mantém os dados na tela).
 function showModal(data) {
   const meta = document.getElementById('modal-meta');
   meta.innerHTML = `
@@ -758,6 +812,9 @@ function closeModalAndReset() {
 }
 
 // ─── PROGRESS ────────────────────────────────────────────────────────────────
+// Indicador de progresso com 3 etapas: Preparando → Enviando → Concluído.
+// Cada etapa tem estado: active (em andamento), done (concluído), error (falhou).
+// A barra de progresso anima de 0% a 90% durante o envio e vai a 100% ao concluir.
 function setStep(n, state) {
   const el = document.getElementById('step-' + n);
   if (!el) return;
@@ -772,6 +829,10 @@ function setStep(n, state) {
 }
 
 // ─── REQUIRED FIELDS ───────────────────────────────────────────────────────
+// Define os campos obrigatórios do header LAS para que o envio seja liberado.
+// KB foi adicionado como obrigatório por decisão da equipe de Data Management.
+// Para adicionar/remover campos obrigatórios: edite o array REQUIRED e o objeto FIELD_LABELS.
+// ATENÇÃO: qualquer alteração aqui impacta a validação e o campo "campos_faltantes" no CSV.
 const REQUIRED = ['WELL','DATE','STRT','STOP','STEP','CURVE','KB'];
 const FIELD_LABELS = {
   WELL:  'Poço (WELL)',
@@ -787,6 +848,9 @@ let currentFile = null;
 let parsedData  = null;
 
 // ─── DRAG & DROP ─────────────────────────────────────────────────────────────
+// Gerencia o arrastar e soltar de arquivos na dropzone.
+// IMPORTANTE: o upload é bloqueado se o tipo de dado não foi selecionado.
+// Aceita apenas arquivos com extensão .las (validado antes do parse).
 const dz = document.getElementById('dropzone');
 dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('dragover'); });
 dz.addEventListener('dragleave', ()=> dz.classList.remove('dragover'));
@@ -807,6 +871,9 @@ document.getElementById('file-input').addEventListener('change', e => {
 });
 
 // ─── FILE HANDLER ────────────────────────────────────────────────────────────
+// Lê o arquivo LAS selecionado, dispara o parser e calcula o MD5.
+// O MD5 é calculado de forma assíncrona via arrayBuffer para não bloquear a UI.
+// O arquivo é lido como texto UTF-8 — encoding padrão para LAS 2.0.
 function handleFile(file) {
   if (!file.name.toLowerCase().endsWith('.las')) {
     showToast('⚠️ Somente arquivos .las são aceitos.', 'error'); return;
@@ -823,6 +890,11 @@ function handleFile(file) {
 }
 
 // ─── LAS PARSER ──────────────────────────────────────────────────────────────
+// Parser do header LAS 2.0 implementado diretamente no browser.
+// Percorre o arquivo linha a linha identificando seções (~V, ~W, ~C, ~A).
+// Para na seção ~A (dados) para não processar o corpo do arquivo (que pode ser grande).
+// Campos extraídos: WELL, DATE, STRT, STOP, STEP, COMP, KB, EKB e curvas da seção ~C.
+// Campos desconhecidos são ignorados silenciosamente — comportamento tolerante a variações de header.
 function parseLAS(text, file) {
   const lines  = text.split(/\r?\n/);
   const fields = {};
@@ -882,6 +954,9 @@ function parseLAS(text, file) {
 }
 
 // ─── RENDER ──────────────────────────────────────────────────────────────────
+// Popula a interface com os metadados extraídos do header LAS.
+// Também executa a validação dos campos obrigatórios e define o status do botão de envio.
+// Enriquece parsedData com: submission_id, curvas_lista, status_validacao, campos_faltantes.
 function renderUI(data, file) {
   // dropzone feedback
   dz.classList.add('has-file');
@@ -974,6 +1049,12 @@ function set(id, val) {
 }
 
 // ─── SUBMIT ──────────────────────────────────────────────────────────────────
+// Gerencia o envio do payload para o Power Automate via HTTP POST (webhook).
+// Timeout de 50 segundos implementado via AbortController — aborta e informa o usuário.
+// O conteúdo do arquivo (base64) está desabilitado no campo "conteudo" por limitação de tamanho.
+// O arquivo físico é salvo no SharePoint pelo bloco "Create file" do fluxo Power Automate.
+// ATENÇÃO: a URL do webhook contém o parâmetro "sig" que pode expirar.
+//          Se ocorrer erro 401, regenerar a URL no Power Automate e atualizar este arquivo.
 document.getElementById('btn-submit').addEventListener('click', async () => {
   const webhookUrl = document.getElementById('webhook-url').value.trim();
   if (!webhookUrl) { showToast('⚠️ Informe a URL do webhook.', 'error'); return; }
@@ -1072,6 +1153,10 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
 });
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
+// Funções utilitárias: conversão de arquivo para base64, reset do formulário e toast de notificação.
+// fileToBase64: usado para codificar o arquivo antes do envio (campo conteudo no payload).
+// resetForm: limpa todos os estados — arquivo, metadados, tipo, progresso e histórico visual.
+// showToast: exibe notificações temporárias no canto inferior direito (4.5 segundos).
 function fileToBase64(file) {
   return new Promise((res, rej) => {
     const r = new FileReader();
