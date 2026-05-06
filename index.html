@@ -564,12 +564,13 @@ function generateUUID() {
 }
 
 // ─── REQUIRED FIELDS ───────────────────────────────────────────────────────
-const REQUIRED = ['WELL','DATE','STRT','STOP','STEP','CURVE'];
+const REQUIRED = ['WELL','DATE','STRT','STOP','STEP','CURVE','KB'];
 const FIELD_LABELS = {
   WELL:  'Poço (WELL)',
   DATE:  'Data de Aquisição (DATE)',
   STRT:  'Profundidade Inicial (STRT)',
   STOP:  'Profundidade Final (STOP)',
+  KB:    'Kelly Bushing (KB)',
   STEP:  'Passo (STEP)',
   CURVE: 'Curvas Presentes (CURVE)'
 };
@@ -707,6 +708,7 @@ function renderUI(data, file) {
 
   const missing = REQUIRED.filter(f => {
     if (f === 'CURVE') return data.curves.length === 0;
+    if (f === 'KB') return !data.kb;
     return !data[f.toLowerCase()];
   });
 
