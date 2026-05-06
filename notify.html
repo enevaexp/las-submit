@@ -1,0 +1,427 @@
+<!--
+================================================================================
+  NOTIFICAÇÃO DE LAS DISPONÍVEL — PÁGINA DE CONFIRMAÇÃO
+  Página intermediária exibida ao responsável de Data Management antes de
+  disparar o e-mail de notificação aos usuários.
+
+  Fluxo:
+    Email 1 (DM recebe) → clica no botão → esta página abre no browser
+    → DM confirma → POST para Fluxo 2 (LAS_Notificacao_Disponivel)
+    → Fluxo 2 envia e-mail aos usuários
+
+  Integração:
+    - Power Automate: LAS_Notificacao_Disponivel
+    - Repositório: github.com/enevaexp/las-submit
+
+  Autor:    Leandro Ribeiro
+  Setor:    Data Management — Exploração & Produção
+  Empresa:  ENEVA S.A.
+  Data:     Maio de 2026
+  Versão:   1.0
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notificar Usuários — LAS Disponível</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg:       #151E25;
+    --surface:  #1E2C35;
+    --surface2: #243340;
+    --surface3: #1A2830;
+    --text:     #FFFAF6;
+    --subtext:  #8A9BA8;
+    --border:   #2C3E4A;
+    --destaque: #E86D4E;
+    --teal:     #306E7D;
+    --verde:    #3A7D5C;
+    --ambar:    #C4873A;
+    --ok:       #3A7D5C;
+    --ok-bg:    #1A2E25;
+    --ok-bdr:   #2E5C42;
+    --err-bg:   #2A1A18;
+    --err-bdr:  #5C2E2A;
+    --radius:   10px;
+    --shadow:   0 4px 20px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  .top-bar {
+    background: var(--surface3);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 32px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .top-bar .label {
+    color: var(--subtext); font-size: 12px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+
+  .page-header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--ambar);
+    padding: 28px 32px 24px;
+  }
+  .page-header .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--ambar); margin-bottom: 6px;
+  }
+  .page-header h1 {
+    font-size: 24px; font-weight: 700; color: var(--text);
+    line-height: 1.2; margin-bottom: 6px;
+  }
+  .page-header .subtitle {
+    font-size: 13px; color: var(--subtext);
+  }
+
+  .container {
+    max-width: 680px; margin: 0 auto; padding: 28px 16px 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ambar);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.8px;
+    text-transform: uppercase; color: var(--subtext);
+    background: var(--surface2);
+  }
+  .card-body { padding: 20px; }
+
+  /* META GRID */
+  .meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .meta-item label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--subtext);
+  }
+  .meta-value {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 5px; padding: 7px 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px; color: var(--text); min-height: 32px;
+  }
+  .meta-value.empty { color: var(--subtext); font-style: italic; font-family: 'Sora', sans-serif; }
+
+  /* WARNING BANNER */
+  .warn-banner {
+    background: #2A2010; border: 1px solid #5C4A2A;
+    border-radius: var(--radius); padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .warn-banner .warn-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .warn-banner .warn-text { font-size: 13px; color: var(--ambar); line-height: 1.6; }
+  .warn-banner .warn-text strong { font-weight: 700; }
+
+  /* ACTIONS */
+  .actions {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .btn-cancel {
+    background: none; border: 1px solid var(--border);
+    color: var(--subtext); border-radius: 6px;
+    padding: 10px 20px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Sora', sans-serif;
+    transition: all .2s;
+  }
+  .btn-cancel:hover { border-color: var(--subtext); color: var(--text); }
+  .btn-confirm {
+    background: var(--ambar); color: #fff;
+    border: none; border-radius: 6px;
+    padding: 10px 24px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Sora', sans-serif;
+    transition: background .2s; display: flex; align-items: center; gap: 8px;
+  }
+  .btn-confirm:hover:not(:disabled) { background: #a86e28; }
+  .btn-confirm:disabled { background: var(--border); color: var(--subtext); cursor: not-allowed; }
+  .btn-confirm.loading { opacity: 0.7; pointer-events: none; }
+
+  /* SPINNER */
+  .spinner {
+    width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin .7s linear infinite; display: none;
+  }
+  .btn-confirm.loading .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* SUCCESS STATE */
+  .success-screen {
+    display: none; text-align: center; padding: 48px 20px;
+  }
+  .success-screen.show { display: block; }
+  .success-icon { font-size: 56px; margin-bottom: 16px; }
+  .success-title { font-size: 22px; font-weight: 700; color: #5DBF8A; margin-bottom: 8px; }
+  .success-sub { font-size: 14px; color: var(--subtext); line-height: 1.6; }
+
+  /* ERROR STATE */
+  .error-banner {
+    background: var(--err-bg); border: 1px solid var(--err-bdr);
+    border-radius: var(--radius); padding: 14px 18px;
+    margin-bottom: 16px; font-size: 13px; color: #E07070;
+    display: none;
+  }
+  .error-banner.show { display: block; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 20px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    transform: translateY(80px); opacity: 0;
+    transition: all .35s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999; max-width: 360px;
+  }
+  .toast.show  { transform: translateY(0); opacity: 1; }
+  .toast.error { background: var(--err-bg); border-color: var(--err-bdr); color: #E07070; }
+  .toast.ok    { background: var(--ok-bg);  border-color: var(--ok-bdr);  color: #5DBF8A; }
+
+  .page-footer {
+    text-align: center; padding: 32px 16px 0;
+    font-size: 11px; color: var(--subtext); letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 520px) {
+    .meta-grid { grid-template-columns: 1fr; }
+    .page-header { padding: 20px 16px 16px; }
+    .container { padding: 16px 10px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <span class="label">ENEVA · Data Management E&P</span>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="eyebrow">CONFIRMAÇÃO DE DISPONIBILIDADE</div>
+  <h1>Dado disponível — notificar equipe</h1>
+  <div class="subtitle">Confirme os dados abaixo antes de notificar os usuários</div>
+</div>
+
+<!-- MAIN -->
+<div class="container" id="main-content">
+
+  <!-- WARNING -->
+  <div class="warn-banner">
+    <span class="warn-icon">⚠️</span>
+    <div class="warn-text">
+      <strong>Atenção:</strong> ao confirmar, um e-mail será disparado automaticamente
+      para todos os usuários cadastrados informando que o dado está disponível.
+      Esta ação não pode ser desfeita.
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-banner" id="error-banner"></div>
+
+  <!-- DADOS DO POÇO -->
+  <div class="card">
+    <div class="card-header">🛢️ Dados do Poço</div>
+    <div class="card-body">
+      <div class="meta-grid">
+        <div class="meta-item">
+          <label>Poço</label>
+          <div class="meta-value" id="m-poco">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Tipo de Dado</label>
+          <div class="meta-value" id="m-tipo">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Empresa Adquiridora</label>
+          <div class="meta-value" id="m-empresa">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Data de Aquisição</label>
+          <div class="meta-value" id="m-data">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Prof. Inicial</label>
+          <div class="meta-value" id="m-strt">—</div>
+        </div>
+        <div class="meta-item">
+          <label>Prof. Final</label>
+          <div class="meta-value" id="m-stop">—</div>
+        </div>
+        <div class="meta-item" style="grid-column: span 2;">
+          <label>Curvas</label>
+          <div class="meta-value" id="m-curvas">—</div>
+        </div>
+        <div class="meta-item" style="grid-column: span 2;">
+          <label>Arquivo</label>
+          <div class="meta-value" id="m-arquivo">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="card">
+    <div class="actions">
+      <button class="btn-cancel" onclick="window.close()">✕ Cancelar</button>
+      <button class="btn-confirm" id="btn-confirm">
+        <div class="spinner"></div>
+        <span id="btn-label">📣 Confirmar e notificar equipe</span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div class="container">
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Equipe notificada com sucesso</div>
+    <div class="success-sub">
+      O e-mail foi disparado automaticamente para todos os usuários cadastrados.<br>
+      Esta janela pode ser fechada.
+    </div>
+  </div>
+</div>
+
+<div class="page-footer">ENEVA · Data Management E&P · Notificação de Disponibilidade LAS</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── WEBHOOK DO FLUXO 2 ──────────────────────────────────────────────────────
+// URL do fluxo Power Automate: LAS_Notificacao_Disponivel
+// ATENÇÃO: o parâmetro "sig" expira periodicamente.
+// Para atualizar: Power Automate → LAS_Notificacao_Disponivel → gatilho HTTP → copiar URL
+const WEBHOOK_URL = 'https://default204da8d8b4164fedb9c1878136be87.a1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f2a08831f4ea4a51a325f8e4f06f99a0/triggers/manual/paths/invoke?api-version=1';
+
+// ─── LER PARÂMETROS DA URL ───────────────────────────────────────────────────
+// Os dados do poço chegam via query string, passados pelo link do Email 1.
+// Exemplo: notify.html?poco=1-ENEV-003&tipo=campo&arquivo=...
+const params = new URLSearchParams(window.location.search);
+
+function getParam(key) {
+  return decodeURIComponent(params.get(key) || '');
+}
+
+const data = {
+  poco:           getParam('poco'),
+  tipo_dados:     getParam('tipo'),
+  arquivo:        getParam('arquivo'),
+  prof_inicial:   getParam('strt'),
+  prof_final:     getParam('stop'),
+  empresa:        getParam('empresa'),
+  data_aquisicao: getParam('data'),
+  curvas_lista:   getParam('curvas'),
+  total_curvas:   getParam('total'),
+  timestamp:      getParam('ts')
+};
+
+// ─── POPULAR CAMPOS NA TELA ──────────────────────────────────────────────────
+function setField(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (val) {
+    el.textContent = val;
+    el.classList.remove('empty');
+  } else {
+    el.textContent = 'não informado';
+    el.classList.add('empty');
+  }
+}
+
+setField('m-poco',    data.poco);
+setField('m-tipo',    data.tipo_dados);
+setField('m-empresa', data.empresa);
+setField('m-data',    data.data_aquisicao);
+setField('m-strt',    data.prof_inicial);
+setField('m-stop',    data.prof_final);
+setField('m-curvas',  data.total_curvas ? `${data.total_curvas} curvas: ${data.curvas_lista}` : data.curvas_lista);
+setField('m-arquivo', data.arquivo);
+
+// ─── CONFIRMAR E ENVIAR ──────────────────────────────────────────────────────
+// Dispara o Fluxo 2 com timeout de 50 segundos.
+// Em caso de sucesso: exibe tela de confirmação.
+// Em caso de erro: exibe banner de erro e libera o botão para nova tentativa.
+document.getElementById('btn-confirm').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-confirm');
+  btn.classList.add('loading');
+  document.getElementById('btn-label').textContent = 'Enviando notificação...';
+
+  const controller = new AbortController();
+  const timeoutId  = setTimeout(() => controller.abort(), 50000);
+
+  try {
+    const resp = await fetch(WEBHOOK_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(data),
+      signal:  controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (resp.ok || resp.status === 202) {
+      document.getElementById('main-content').style.display = 'none';
+      document.getElementById('success-screen').classList.add('show');
+    } else {
+      throw new Error(`HTTP ${resp.status}`);
+    }
+  } catch (err) {
+    clearTimeout(timeoutId);
+    const isTimeout = err.name === 'AbortError';
+    const msg = isTimeout
+      ? '⏱️ Tempo limite excedido. Verifique sua conexão e tente novamente.'
+      : `❌ Erro ao enviar: ${err.message}`;
+    const errBanner = document.getElementById('error-banner');
+    errBanner.textContent = msg;
+    errBanner.classList.add('show');
+    showToast(msg, 'error');
+  } finally {
+    btn.classList.remove('loading');
+    if (document.getElementById('success-screen').classList.contains('show') === false) {
+      document.getElementById('btn-label').textContent = '📣 Confirmar e notificar equipe';
+    }
+  }
+});
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 5000);
+}
+</script>
+</body>
+</html>
