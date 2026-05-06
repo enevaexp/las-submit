@@ -703,7 +703,7 @@ function renderUI(data, file) {
   // validate
   // Enrich parsedData with audit fields
   parsedData.submission_id     = generateUUID();
-  parsedData.curvas_lista      = data.curves.join(';');
+  parsedData.curvas_lista      = data.curves.join(',');
 
   const missing = REQUIRED.filter(f => {
     if (f === 'CURVE') return data.curves.length === 0;
@@ -711,7 +711,7 @@ function renderUI(data, file) {
   });
 
   parsedData.status_validacao  = missing.length === 0 ? 'aprovado' : 'bloqueado';
-  parsedData.campos_faltantes  = missing.length === 0 ? '' : missing.map(f => FIELD_LABELS[f]).join(';');
+  parsedData.campos_faltantes  = missing.length === 0 ? '' : missing.map(f => FIELD_LABELS[f]).join(',');
 
   const banner  = document.getElementById('validation-banner');
   const btnSubmit = document.getElementById('btn-submit');
