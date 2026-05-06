@@ -775,7 +775,7 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
 
   const payload = {
     submissao: {
-      timestamp:  new Date().toISOString(),
+      timestamp:  new Date().toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false}).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1'),
       gate:       'Gate 2 - Submissão LAS',
       origem:     'Interface Web LAS Upload',
       tipo_dados: tipoDados
