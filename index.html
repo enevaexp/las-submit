@@ -279,6 +279,113 @@
   .card { border-left: 3px solid var(--teal); }
 
 
+  /* DROPZONE DISABLED */
+  .dropzone.disabled {
+    opacity: 0.4; pointer-events: none; cursor: not-allowed;
+  }
+  .tipo-required-hint {
+    text-align: center; font-size: 12px; color: var(--ambar);
+    margin-top: 10px; display: none;
+  }
+  .tipo-required-hint.show { display: block; }
+
+  /* PROGRESS STEPS */
+  .progress-wrap {
+    display: none; flex-direction: column; gap: 8px;
+    padding: 16px 20px; background: var(--surface2);
+    border-top: 1px solid var(--border);
+  }
+  .progress-wrap.show { display: flex; }
+  .progress-step {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--subtext); transition: color .3s;
+  }
+  .progress-step.active { color: var(--text); }
+  .progress-step.done   { color: #5DBF8A; }
+  .progress-step.error  { color: #E07070; }
+  .step-icon { font-size: 16px; width: 20px; text-align: center; }
+  .step-bar {
+    height: 3px; background: var(--border); border-radius: 2px;
+    overflow: hidden; margin-top: 4px;
+  }
+  .step-bar-fill {
+    height: 100%; background: var(--teal); width: 0%;
+    transition: width 1s linear; border-radius: 2px;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 32px; width: 90%; max-width: 480px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    transform: translateY(20px); transition: transform .3s;
+  }
+  .modal-overlay.show .modal { transform: translateY(0); }
+  .modal-icon { font-size: 48px; text-align: center; margin-bottom: 12px; }
+  .modal-title {
+    font-size: 20px; font-weight: 700; color: var(--text);
+    text-align: center; margin-bottom: 6px;
+  }
+  .modal-subtitle {
+    font-size: 13px; color: var(--subtext); text-align: center;
+    margin-bottom: 20px;
+  }
+  .modal-meta {
+    background: var(--surface2); border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 20px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .modal-meta-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px;
+  }
+  .modal-meta-row .mlabel { color: var(--subtext); font-weight: 600; }
+  .modal-meta-row .mvalue { color: var(--text); font-family: 'Courier New', monospace; font-size: 11px; }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-modal-novo {
+    flex: 1; background: var(--teal); color: #fff;
+    border: none; border-radius: 8px; padding: 11px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Sora', sans-serif; transition: background .2s;
+  }
+  .btn-modal-novo:hover { background: #245A68; }
+  .btn-modal-fechar {
+    flex: 1; background: none; color: var(--subtext);
+    border: 1px solid var(--border); border-radius: 8px; padding: 11px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Sora', sans-serif; transition: all .2s;
+  }
+  .btn-modal-fechar:hover { border-color: var(--subtext); color: var(--text); }
+
+  /* HISTORY */
+  .history-card { margin-top: 16px; }
+  .history-empty {
+    text-align: center; color: var(--subtext); font-size: 13px; padding: 20px 0;
+  }
+  .history-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 8px;
+    border-radius: 4px; text-transform: uppercase; white-space: nowrap;
+  }
+  .history-badge.campo        { background: #1A2E35; color: #6DC4D0; border: 1px solid var(--teal); }
+  .history-badge.reprocessado { background: #2A2010; color: var(--ambar); border: 1px solid var(--ambar); }
+  .history-info { flex: 1; min-width: 0; }
+  .history-poco { font-size: 13px; font-weight: 600; color: var(--text); }
+  .history-file { font-size: 11px; color: var(--subtext); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-time { font-size: 11px; color: var(--subtext); white-space: nowrap; }
+
   /* TIPO DADOS TOGGLE */
   .tipo-card { margin-bottom: 16px; }
   .tipo-options {
@@ -347,7 +454,7 @@
 <div class="container">
 
   <!-- WEBHOOK URL (hidden) -->
-  <input type="hidden" id="webhook-url" value="https://default204da8d8b4164fedb9c1878136be87.a1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6bbef2cbe6e642899ca5a0d0e9725ab2/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=5060eB8D6uIaCfT0kaQCBb_U2qgd-q4ZHFbACgqsyqE" />
+  <input type="hidden" id="webhook-url" value="https://default204da8d8b4164fedb9c1878136be87.a1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6bbef2cbe6e642899ca5a0d0e9725ab2/triggers/manual/paths/invoke?api-version=1" />
 
   <!-- TIPO DE DADOS -->
   <div class="card tipo-card">
@@ -375,7 +482,7 @@
         <span class="dropzone-icon" id="dz-icon">📂</span>
         <h3 id="dz-title">Arraste o arquivo LAS aqui</h3>
         <p id="dz-sub">ou clique para selecionar</p>
-        <button class="btn-select" onclick="document.getElementById('file-input').click()">
+        <button class="btn-select" onclick="if(!tipoDados){showTipoHint();return;}document.getElementById('file-input').click()">
           Selecionar arquivo .las
         </button>
         <span class="file-hint">Somente arquivos .las · Versão LAS 2.0</span>
@@ -383,6 +490,9 @@
       </div>
     </div>
   </div>
+
+  <!-- TIPO HINT -->
+  <p class="tipo-required-hint" id="tipo-hint">⚠️ Selecione o tipo de dados antes de carregar o arquivo</p>
 
   <!-- VALIDATION BANNER -->
   <div class="banner" id="validation-banner">
@@ -459,6 +569,28 @@
     </div>
   </div>
 
+  <!-- HISTORY CARD -->
+  <div class="card history-card" id="history-card" style="display:none;">
+    <div class="card-header">🕓 Histórico da Sessão</div>
+    <div class="card-body" id="history-body">
+      <div class="history-empty">Nenhum envio nesta sessão.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL SUCESSO -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-icon">✅</div>
+    <div class="modal-title">Arquivo enviado com sucesso!</div>
+    <div class="modal-subtitle">O arquivo foi recebido e está em processamento.<br>A equipe responsável foi notificada automaticamente.</div>
+    <div class="modal-meta" id="modal-meta"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-novo" onclick="closeModalAndReset()">Novo envio</button>
+      <button class="btn-modal-fechar" onclick="closeModal()">Fechar</button>
+    </div>
+  </div>
 </div>
 
 <!-- FOOTER -->
@@ -563,6 +695,82 @@ function generateUUID() {
   });
 }
 
+// ─── TIPO HINT ───────────────────────────────────────────────────────────────
+function showTipoHint() {
+  const h = document.getElementById('tipo-hint');
+  h.classList.add('show');
+  setTimeout(() => h.classList.remove('show'), 3000);
+}
+
+// ─── HISTORY ─────────────────────────────────────────────────────────────────
+function saveHistory(data) {
+  const history = JSON.parse(sessionStorage.getItem('las_history') || '[]');
+  history.unshift({
+    poco:      data.well      || '—',
+    arquivo:   data.filename  || '—',
+    tipo:      tipoDados      || '—',
+    timestamp: new Date().toLocaleString('pt-BR', {timeZone:'America/Sao_Paulo', hour:'2-digit', minute:'2-digit'})
+  });
+  if (history.length > 5) history.pop();
+  sessionStorage.setItem('las_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const history = JSON.parse(sessionStorage.getItem('las_history') || '[]');
+  const card = document.getElementById('history-card');
+  const body = document.getElementById('history-body');
+  if (history.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  body.innerHTML = history.map(h => `
+    <div class="history-item">
+      <span class="history-badge ${h.tipo}">${h.tipo}</span>
+      <div class="history-info">
+        <div class="history-poco">${h.poco}</div>
+        <div class="history-file">${h.arquivo}</div>
+      </div>
+      <span class="history-time">${h.timestamp}</span>
+    </div>
+  `).join('');
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+function showModal(data) {
+  const meta = document.getElementById('modal-meta');
+  meta.innerHTML = `
+    <div class="modal-meta-row"><span class="mlabel">Poço</span><span class="mvalue">${data.well || '—'}</span></div>
+    <div class="modal-meta-row"><span class="mlabel">Arquivo</span><span class="mvalue">${data.filename}</span></div>
+    <div class="modal-meta-row"><span class="mlabel">Tipo</span><span class="mvalue">${tipoDados}</span></div>
+    <div class="modal-meta-row"><span class="mlabel">Profundidade</span><span class="mvalue">${data.strt || '—'} – ${data.stop || '—'}</span></div>
+    <div class="modal-meta-row"><span class="mlabel">Curvas</span><span class="mvalue">${data.curves.length} identificadas</span></div>
+    <div class="modal-meta-row"><span class="mlabel">Status</span><span class="mvalue" style="color:#5DBF8A;">✅ Enviado com sucesso</span></div>
+  `;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+function closeModalAndReset() {
+  closeModal();
+  setTimeout(resetForm, 300);
+}
+
+// ─── PROGRESS ────────────────────────────────────────────────────────────────
+function setStep(n, state) {
+  const el = document.getElementById('step-' + n);
+  if (!el) return;
+  el.className = 'progress-step ' + state;
+  const icons = { active: '⏳', done: '✅', error: '❌' };
+  const labels = {
+    1: 'Preparando dados...',
+    2: 'Enviando para Power Automate...',
+    3: state === 'error' ? 'Erro no envio' : 'Concluído'
+  };
+  el.innerHTML = `<span class="step-icon">${icons[state] || '⏸️'}</span> ${labels[n]}`;
+}
+
 // ─── REQUIRED FIELDS ───────────────────────────────────────────────────────
 const REQUIRED = ['WELL','DATE','STRT','STOP','STEP','CURVE','KB'];
 const FIELD_LABELS = {
@@ -570,9 +778,9 @@ const FIELD_LABELS = {
   DATE:  'Data de Aquisição (DATE)',
   STRT:  'Profundidade Inicial (STRT)',
   STOP:  'Profundidade Final (STOP)',
-  KB:    'Kelly Bushing (KB)',
   STEP:  'Passo (STEP)',
-  CURVE: 'Curvas Presentes (CURVE)'
+  CURVE: 'Curvas Presentes (CURVE)',
+  KB:    'Kelly Bushing (KB)'
 };
 
 let currentFile = null;
@@ -584,11 +792,15 @@ dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('dr
 dz.addEventListener('dragleave', ()=> dz.classList.remove('dragover'));
 dz.addEventListener('drop', e => {
   e.preventDefault(); dz.classList.remove('dragover');
+  if (!tipoDados) { showTipoHint(); return; }
   const f = e.dataTransfer.files[0];
   if (f) handleFile(f);
 });
 dz.addEventListener('click', e => {
-  if (e.target.tagName !== 'BUTTON') document.getElementById('file-input').click();
+  if (e.target.tagName !== 'BUTTON') {
+    if (!tipoDados) { showTipoHint(); return; }
+    document.getElementById('file-input').click();
+  }
 });
 document.getElementById('file-input').addEventListener('change', e => {
   if (e.target.files[0]) handleFile(e.target.files[0]);
@@ -713,7 +925,7 @@ function renderUI(data, file) {
   });
 
   parsedData.status_validacao  = missing.length === 0 ? 'aprovado' : 'bloqueado';
-  parsedData.campos_faltantes  = missing.length === 0 ? '' : missing.map(f => FIELD_LABELS[f]).join(',');
+  parsedData.campos_faltantes  = missing.length === 0 ? '' : missing.map(f => FIELD_LABELS[f]).join(';');
 
   const banner  = document.getElementById('validation-banner');
   const btnSubmit = document.getElementById('btn-submit');
@@ -772,9 +984,15 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
   btn.classList.add('loading');
   document.getElementById('btn-label').textContent = 'Enviando...';
 
-  // encode file as base64
-  const base64 = await fileToBase64(currentFile);
+  // Show progress
+  const pw = document.getElementById('progress-wrap');
+  pw.classList.add('show');
+  setStep(1, 'active');
+  setStep(2, '');
+  setStep(3, '');
 
+  // Step 1: prepare payload
+  const base64 = await fileToBase64(currentFile);
   const payload = {
     submissao: {
       timestamp:  new Date().toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false}).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1'),
@@ -805,15 +1023,33 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
     }
   };
 
+  setStep(1, 'done');
+  setStep(2, 'active');
+
+  // Progress bar animation
+  const fill = document.getElementById('step-bar-fill');
+  fill.style.width = '0%';
+  setTimeout(() => { fill.style.width = '90%'; }, 100);
+
+  // AbortController for 50s timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 50000);
+
   try {
     const resp = await fetch(webhookUrl, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload)
+      body:    JSON.stringify(payload),
+      signal:  controller.signal
     });
+    clearTimeout(timeoutId);
 
     if (resp.ok || resp.status === 202) {
-      showToast('✅ Arquivo enviado com sucesso ao Power Automate!', 'success');
+      fill.style.width = '100%';
+      setStep(2, 'done');
+      setStep(3, 'done');
+      saveHistory(parsedData);
+      setTimeout(() => showModal(parsedData), 400);
       btn.disabled = true;
       document.getElementById('btn-label').textContent = '✓ Enviado';
       btn.style.background = 'var(--ok)';
@@ -821,7 +1057,14 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
       throw new Error(`HTTP ${resp.status}`);
     }
   } catch (err) {
-    showToast(`❌ Erro ao enviar: ${err.message}`, 'error');
+    clearTimeout(timeoutId);
+    const isTimeout = err.name === 'AbortError';
+    setStep(2, 'error');
+    setStep(3, 'error');
+    fill.style.width = '0%';
+    showToast(isTimeout
+      ? '⏱️ Tempo limite de 50s excedido. Tente novamente.'
+      : `❌ Erro ao enviar: ${err.message}`, 'error');
   } finally {
     btn.classList.remove('loading');
     if (!btn.disabled) document.getElementById('btn-label').textContent = 'Revisar e enviar →';
@@ -857,6 +1100,9 @@ function resetForm() {
   btn.classList.remove('loading');
   document.getElementById('btn-label').textContent = 'Revisar e enviar →';
 }
+
+// Init history on load
+renderHistory();
 
 function showToast(msg, type='') {
   const t = document.getElementById('toast');
